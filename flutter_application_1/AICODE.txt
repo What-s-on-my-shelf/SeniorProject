@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const GroceryApp());
+}
+
+class GroceryApp extends StatelessWidget {
+  const GroceryApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Grocery List',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
+      home: const GroceryListScreen(),
+    );
+  }
+}
+
+class GroceryListScreen extends StatefulWidget {
+  const GroceryListScreen({super.key});
+
+  @override
+  State<GroceryListScreen> createState() => _GroceryListScreenState();
+}
+
+class _GroceryListScreenState extends State<GroceryListScreen> {
+  final List<Map<String, dynamic>> _groceryItems = [];
+  final TextEditingController _controller = TextEditingController();
+
+  void _addItem(String itemName) {
+    if (itemName.trim().isEmpty) return;
+    setState(() {
+      _groceryItems.add({
+        'name': itemName,
+        'isBought': false,
+      });
+    });
+    _controller.clear();
+  }
+
+  void _toggleBought(int index) {
+    setState(() {
+      _groceryItems[index]['isBought'] = !_groceryItems[index]['isBought'];
+    });
+  }
+
+  void _deleteItem(int index) {
+    setState(() {
+      _groceryItems.removeAt(index);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Grocery List"),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          // Input field
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      labelText: "Add an item",
+                      border: OutlineInputBorder(),
+                    ),
+                    onSubmitted: _addItem,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => _addItem(_controller.text),
+                  child: const Text("Add"),
+                ),
+              ],
+            ),
+          ),
+          // Grocery list
+          Expanded(
+            child: ListView.builder(
+              itemCount: _groceryItems.length,
+              itemBuilder: (context, index) {
+                final item = _groceryItems[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      item['name'],
+                      style: TextStyle(
+                        decoration: item['isBought']
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
+                    ),
+                    leading: Checkbox(
+                      value: item['isBought'],
+                      onChanged: (_) => _toggleBought(index),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _deleteItem(index),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
